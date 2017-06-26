@@ -1,5 +1,4 @@
 using SMC
 using Base.Test
 
-# write your own tests here
-@test 1 == 2
+@testset "hmm"    begin include("hmm_test.jl")   end

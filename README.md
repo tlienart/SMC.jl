@@ -1,8 +1,8 @@
 # SMC
 
-Unix | Windows | CodeCov | License
----- | ------- | ------- | -------
-[![Travis](https://travis-ci.org/tlienart/SMC.jl.svg?branch=master)](https://travis-ci.org/tlienart/SMC.jl) | [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/tlienart/SMC.jl?branch=master&svg=true)](https://ci.appveyor.com/project/tlienart/smc-jl) | [![CodeCov](http://codecov.io/github/tlienart/SMC.jl/coverage.svg?branch=master)](http://codecov.io/github/tlienart/SMC.jl?branch=master) | [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+Unix | CodeCov | License
+---- | ------- | -------
+[![Travis](https://travis-ci.org/tlienart/SMC.jl.svg?branch=master)](https://travis-ci.org/tlienart/SMC.jl) | [![CodeCov](http://codecov.io/github/tlienart/SMC.jl/coverage.svg?branch=master)](http://codecov.io/github/tlienart/SMC.jl?branch=master) | [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## What's this about
 
@@ -14,7 +14,7 @@ If you're looking for something more serious, consider [Lawrence Murray's](http:
 
 Requirements:
 
-* Julia in `[0.5.x, 0.6.x]`
+* Julia in `[0.6.x]`
 * 64-bit architecture
 
 In the Julia REPL:
