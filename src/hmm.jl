@@ -11,11 +11,13 @@ struct LinearGaussian <: HMM
     =#
     A::Matrix{Float}
     B::Matrix{Float}
-    cholQ::Union{Float,UpperTriangular{Float, Matrix{Float}}}
-    cholR::Union{Float,UpperTriangular{Float, Matrix{Float}}}
+    Q::Matrix{Float}
+    R::Matrix{Float}
     # implicit
     dimx::Int
     dimy::Int
+    cholQ::Union{Float,UpperTriangular{Float, Matrix{Float}}}
+    cholR::Union{Float,UpperTriangular{Float, Matrix{Float}}}
     function LinearGaussian(A,B,Q,R)
         dimx=size(A,1)
         dimy=size(B,1)
@@ -23,7 +25,7 @@ struct LinearGaussian <: HMM
         @assert dimy==size(R,1)==size(R,2) "dimensions don't match"
         @assert issymmetric(Q) && issymmetric(R) "cov mat must be symmetric"
         @assert isposdef(Q) && isposdef(R) "cov mat must be pos def"
-        new(A,B,chol(Q),chol(R), dimx, dimy)
+        new(A,B,Q,R,dimx,dimy,chol(Q),chol(R))
     end
 end
 
