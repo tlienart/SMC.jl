@@ -23,3 +23,7 @@ In the Julia REPL:
 Pkg.clone("https://github.com/tlienart/SMC.jl.git")
 using SMC
 ```
+
+## Things implemented
+
+* Kalman Filter and Smoother (for comparison on Linear Gaussian model)
