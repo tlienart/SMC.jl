@@ -43,7 +43,7 @@ function generate(hmm::LinearGaussian, x0::Vector{Float}, T::Int
     noisex = hmm.cholQ'*randn(hmm.dimx,T)
     noisey = hmm.cholR'*randn(hmm.dimy,T)
 
-    for t in 1:(T-1)
+    for t = 1:(T-1)
         observations[:,t] = hmm.B*states[:,t] + noisey[:,t]
         states[:,t+1]     = hmm.A*states[:,t] + noisex[:,t+1]
     end

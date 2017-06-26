@@ -7,8 +7,8 @@ srand(125)
 dx, dy = 5, 3
 A = randn(dx,dx)
 B = randn(dy,dx)
-Q = randn(dx,dx); Q *= Q'; Q += 0.5*eye(dx); Q += Q'; Q /= 2
-R = randn(dy,dy); R *= R'; R += 0.5*eye(dy); R += R'; R /= 2
+Q = randn(dx,dx); Q *= Q'; Q += 0.5*eye(dx); Q += Q'; Q /= 20
+R = randn(dy,dy); R *= R'; R += 0.5*eye(dy); R += R'; R /= 20
 
 lg = LinearGaussian(A,B,Q,R)
 x0 = randn(dx)
@@ -34,3 +34,7 @@ obs3   = B*state3+noisey[:,3]
 @test obs1==observations[:,1] &&
       obs2==observations[:,2] &&
       obs3==observations[:,3]
+
+(kf_mus, kf_covs) = kalmanfilter(lg, observations, x0, eye(dx))
+
+@test norm(kf_mus-states)/norm(states) < 0.1
