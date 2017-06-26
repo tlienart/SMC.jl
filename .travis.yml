@@ -6,11 +6,9 @@ julia:
   - 0.6
 notifications:
   email: false
-git:
-  depth: 99999999
-
 script:
+  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.clone(pwd()); Pkg.test("SMC"; coverage=true)'
-#  - julia -e 'Pkg.clone("https://github.com/tlienart/ExpFamily.jl.git"); using ExpFamily; Pkg.clone(pwd()); Pkg.test("SMC"; coverage=true)'
 after_success:
+  # push coverage results to Codecov
   - julia -e 'cd(Pkg.dir("SMC")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
