@@ -9,9 +9,9 @@ srand(125)
 ## Linear Gaussian
 
 dx, dy = 5, 3
-A = randn(dx,dx)
-B = randn(dy,dx)
-Q = randn(dx,dx); Q *= Q'; Q += 0.5*eye(dx); Q += Q'; Q /= 20
+A = randn(dx,dx); A /= 0.9norm(A)
+B = randn(dy,dx); B /= 1.1norm(B)
+Q = randn(dx,dx); Q *= Q'; Q += 0.5*eye(dx); Q += Q'; Q /= 5
 R = randn(dy,dy); R *= R'; R += 0.5*eye(dy); R += R'; R /= 20
 
 lg = LinearGaussian(A,B,Q,R)
@@ -39,21 +39,24 @@ obs3   = B*state3+noisey[:,3]
       obs2==observations[:,2] &&
       obs3==observations[:,3]
 
-T = 50
+T = 100
 (states, observations) = generate(lg, x0, T)
 
+x00 = x0+randn(dx)/5
+
 srand(12)
-kf = kalmanfilter(lg, observations, x0, eye(dx))
+kf = kalmanfilter(lg, observations, x00, eye(dx))
 srand(12)
 (kfm_leg, kfc_leg, kfm__leg, kfc__leg) = kf_legacy(observations, A, B, Q,
-                                                    R, T, x0, eye(dx))
+                                                    R, T, x00, eye(dx))
 
 @test isapprox(kf.means, kfm_leg)
 @test isapprox(kf.covariances, kfc_leg)
 @test isapprox(kf.means_, kfm__leg)
 @test isapprox(kf.covariances_, kfc__leg)
 
-@test norm(kf.means-states)/norm(states) < 0.1
+# fragile test
+@test norm(kf.means-states)/norm(states) < 0.25
 
 srand(32)
 ks = kalmansmoother(lg, observations, kf)
@@ -64,4 +67,5 @@ srand(32)
 @test isapprox(ks.means, ksm_leg)
 @test isapprox(ks.covariances, ksc_leg)
 
-@test norm(ks.means-states)/norm(states) < 1e-5
+# fragile test
+@test norm(ks.means-states)/norm(states) < 0.2

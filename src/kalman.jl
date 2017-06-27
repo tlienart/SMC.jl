@@ -5,6 +5,7 @@ export  KalmanFilter,
 struct KalmanFilter
     means::Matrix{Float}
     covariances::Array{Float,3}
+    # Storage for recycling in kalman smoother
     means_::Matrix{Float}
     covariances_::Array{Float,3}
 end
