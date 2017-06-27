@@ -1,7 +1,9 @@
 module SMC
 
 using Compat
-using Distributions:Multinomial
+using ExpFamily
+using Distributions
+
 
 import Base.length, Base.mean
 
@@ -11,7 +13,7 @@ const Float = Float64
 include("hmm.jl")
 include("kalman.jl")
 
-include("particleset.jl")
+include("particles.jl")
 include("particlefilter.jl")
 include("particlesmoother.jl")
 

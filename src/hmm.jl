@@ -1,10 +1,22 @@
 export
+    HMM,
     LinearGaussian,
     generate
 
-abstract type HMM end
+abstract type AbstractHMM end
 
-struct LinearGaussian <: HMM
+struct HMM <: AbstractHMM
+    transmean::Function
+    transloglik::Function # log transition function:  f(xk|xkm1)
+    transnoise::Function
+    obsmean::Function
+    obsloglik::Function   # log observation function: g(y|xk)
+    obsnoise::Function
+    dimx::Int
+    dimy::Int
+end
+
+struct LinearGaussian <: AbstractHMM
     #=
         x <- Ax + Q*randn
         y <- Bx + R*randn
@@ -29,27 +41,43 @@ struct LinearGaussian <: HMM
     end
 end
 
+function HMM(lg::LinearGaussian)
+    transmean   = (k, xkm1) -> lg.A*xkm1
+    obsmean     = (k, xk) -> lg.B*xk
+    transloglik = (k, xkm1, xk) -> -norm(lg.cholQ\(xk - transmean(k,xkm1)))^2/2
+    obsloglik   = (k, xk,   yk) -> -norm(lg.cholR\(yk - obsmean(k,xk)))^2/2
+
+    transnoise() = lg.cholQ'*randn(lg.dimx)
+    obsnoise()   = lg.cholR'*randn(lg.dimy)
+
+    HMM(transmean, transloglik, transnoise,
+        obsmean, obsloglik, obsnoise,
+        lg.dimx, lg.dimy)
+end
+
+### Generation of observations
+
 """
-    generate(hmm, x0, T)
+    generate(lg, x0, T)
 
 Generate observations following a given dynamic for `T` time steps.
 """
-function generate(hmm::LinearGaussian, x0::Vector{Float}, T::Int
+function generate(lg::LinearGaussian, x0::Vector{Float}, K::Int
                     )::Tuple{Matrix{Float},Matrix{Float}}
-    @assert length(x0)==hmm.dimx "dimensions don't match"
+    @assert length(x0)==lg.dimx "dimensions don't match"
 
-    states, observations = zeros(hmm.dimx, T), zeros(hmm.dimy, T)
+    states, observations = zeros(lg.dimx, K), zeros(lg.dimy, K)
 
     states[:,1] = x0
 
-    noisex = hmm.cholQ'*randn(hmm.dimx,T)
-    noisey = hmm.cholR'*randn(hmm.dimy,T)
+    noisex = lg.cholQ'*randn(lg.dimx,K)
+    noisey = lg.cholR'*randn(lg.dimy,K)
 
-    for t = 1:(T-1)
-        observations[:,t] = hmm.B*states[:,t] + noisey[:,t]
-        states[:,t+1]     = hmm.A*states[:,t] + noisex[:,t+1]
+    for k = 1:(K-1)
+        observations[:,k] = lg.B*states[:,k] + noisey[:,k]
+        states[:,k+1]     = lg.A*states[:,k] + noisex[:,k+1]
     end
-    observations[:,T] = hmm.B*states[:,T] + noisey[:,T]
+    observations[:,K] = lg.B*states[:,K] + noisey[:,K]
 
     return (states, observations)
 end
