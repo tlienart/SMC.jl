@@ -1,7 +1,7 @@
 module SMC
 
 using Compat
-using ExpFamily
+# using ExpFamily
 using Distributions
 
 
