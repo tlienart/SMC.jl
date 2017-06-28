@@ -9,30 +9,46 @@ mutable struct Particles{T <: ParticleType}
     x::Vector{T}     # N x (1) or N x (dimx)
     w::Vector{Float} # N
 end
-Particles(N::Int, dx::Int) = Particles(
-    dx==1 ? zeros(N) : Vector{Vector{Float}}(N), ones(N)/N)
 
 mutable struct ParticleSet{T <: ParticleType}
     p::Vector{Particles{T}} # T
 end
-ParticleSet(N::Int, dx::Int, K::Int) =
-    ParticleSet([Particles(N,dx) for i in 1:K])
 
+
+"""
+    Particles(N,dx)
+
+Create a Particles object with `N` particles each of dimension `dx`.
+"""
+Particles(N::Int, dx::Int=1) =
+    Particles( dx==1 ? zeros(N) : Vector{Vector{Float}}(N), ones(N)/N )
+
+"""
+    ParticleSet(N,dx,K)
+
+Create a set of `K` Particles with `N` particles of dimension `dx`. This is for
+a HMM with `K` steps.
+"""
+ParticleSet(N::Int, dx::Int, K::Int) =
+    ParticleSet( [Particles(N,dx) for i in 1:K] )
+
+"""
+    length(p::Particles)
+
+Number of particles.
+"""
 length(p::Particles)    = length(p.w)
+
+"""
+    length(ps::ParticleSet)
+
+Number of slices (steps in the HMM).
+"""
 length(ps::ParticleSet) = length(ps.p)
 
+"""
+    mean(p::Particles)
+
+Compute the mean corresponding to the particles `p`.
+"""
 mean(p::Particles) = sum(p.x[i] * p.w[i] for i = 1:length(p))
-
-function multinomialresampling(p::Particles, essthresh::Float=Inf)::Particles
-    N    = length(p)
-    ni   = rand(Multinomial(N, p.w))
-    mask = [j for i in 1:N for j in ones(Int,ni[i])*i]
-    Particles(p.x[mask], ones(N)/N)
-end
-
-function resample(p::Particles, essthresh::Float=0.0,
-                    rs::Function=multinomialresampling
-                    )::Tuple{Particles,Float}
-    ess = 1.0/sum(p.w.^2)
-    (ess < essthresh * length(p)) ? (rs(p),ess) : (p,ess)
-end

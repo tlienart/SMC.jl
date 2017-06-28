@@ -14,6 +14,7 @@ include("hmm.jl")
 include("kalman.jl")
 
 include("particles.jl")
+include("resample.jl")
 include("particlefilter.jl")
 include("particlesmoother.jl")
 

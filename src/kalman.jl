@@ -34,10 +34,10 @@ function kalmanfilter(lg::LinearGaussian, observations::Matrix{Float},
         # intermediate (k|k-1)
         mu_ = lg.A * kf_means[:,k-1]
         C_  = lg.A * kf_covs[:,:,k-1] * lg.A' + lg.Q
-        K_  = (C_ * lg.B') / (lg.R + lg.B*C_*lg.B')
+        G_  = (C_ * lg.B') / (lg.R + lg.B*C_*lg.B')
         # update (k|k)
-        kf_means[:,k]  = mu_ + K_*(observations[:,k]-lg.B*mu_)
-        kf_covs[:,:,k] = (eye(lg.dimx) - K_*lg.B)*C_
+        kf_means[:,k]  = mu_ + G_*(observations[:,k]-lg.B*mu_)
+        kf_covs[:,:,k] = (eye(lg.dimx) - G_*lg.B)*C_
         # storage for smoothing
         kf_means_[:,k]  = mu_
         kf_covs_[:,:,k] = C_
@@ -60,9 +60,9 @@ function kalmansmoother(lg::LinearGaussian, observations::Matrix{Float},
                         kf.covariances_[:,:,end] \ kf.means_[:,end] + c )
     # Kalman Smoother with 2 Filter Smoother update
     for k   = (size(observations,2)-1):-1:1
-        K   = (eye(lg.dimx) + lg.Q*Pbi)\lg.A
-        Pbi = Pbi_K+iQA'*(lg.A-K)
-        c   = iRB'*observations[:,k] + K'*c
+        G   = (eye(lg.dimx) + lg.Q*Pbi)\lg.A
+        Pbi = Pbi_K+iQA'*(lg.A-G)
+        c   = iRB'*observations[:,k] + G'*c
         #
         ks_covs[:,:,k] = inv(inv(kf.covariances_[:,:,k]) + Pbi )
         ks_means[:,k]  = ks_covs[:,:,k] * (

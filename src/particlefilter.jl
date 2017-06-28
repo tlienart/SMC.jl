@@ -1,7 +1,6 @@
 export particlefilter
 
 function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
-#                        samplemu1::Function,
                         essthresh::Float=0.5
                         )::Tuple{ParticleSet,Vector{Float}}
 
