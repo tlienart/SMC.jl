@@ -52,3 +52,10 @@ length(ps::ParticleSet) = length(ps.p)
 Compute the mean corresponding to the particles `p`.
 """
 mean(p::Particles) = sum(p.x[i] * p.w[i] for i = 1:length(p))
+
+"""
+    mean(ps::Particles)
+
+Compute the mean corresponding to a particle set
+"""
+mean(ps::ParticleSet) = [mean(p) for p in ps.p]

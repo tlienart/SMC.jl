@@ -80,9 +80,12 @@ srand(32)
 
 (ps, ess) = particlefilter(hmm, observations, 100)
 
-pfm = zeros(dx,K)
+@test length(ps)==K
+
+pfm  = mean(ps)
+pfmm = zeros(dx,K)
 for k in 1:K
-    pfm[:,k] = mean(ps.p[k])
+    pfmm[:,k] = pfm[k]
 end
 
-@test norm(pfm-states)/norm(states) < 0.4
+@test norm(pfmm-states)/norm(states) < 0.4
