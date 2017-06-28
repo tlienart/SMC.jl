@@ -4,14 +4,15 @@ export  KalmanFilter,
 
 struct KalmanFilter
     means::Matrix{Float}
-    covariances::Array{Float,3}
+    covs::Array{Float,3}
     # Storage for recycling in kalman smoother
     means_::Matrix{Float}
-    covariances_::Array{Float,3}
+    covs_::Array{Float,3}
 end
+
 struct KalmanSmoother
     means::Matrix{Float}
-    covariances::Array{Float,3}
+    covs::Array{Float,3}
 end
 
 function kalmanfilter(lg::LinearGaussian, observations::Matrix{Float},
@@ -48,25 +49,26 @@ end
 function kalmansmoother(lg::LinearGaussian, observations::Matrix{Float},
                         kf::KalmanFilter)::KalmanSmoother
     ks_means = similar(kf.means)
-    ks_covs  = similar(kf.covariances)
+    ks_covs  = similar(kf.covs)
+    # Nsteps
+    K = size(observations,2)
     # Pre-computations
     iQA, iRB = lg.Q\lg.A, lg.R\lg.B
-    Pbi   = lg.B'*iRB
-    Pbi_K = copy(Pbi)
-    c     = iRB'*observations[:,end]
+    Pbi      = lg.B'*iRB
+    Pbi_K    = copy(Pbi)
+    c        = iRB'*observations[:,K]
     # Initialisation
-    ks_covs[:,:,end] = inv(inv(kf.covariances_[:,:,end]) + Pbi_K )
-    ks_means[:,end]  = ks_covs[:,:,end] * (
-                        kf.covariances_[:,:,end] \ kf.means_[:,end] + c )
-    # Kalman Smoother with 2 Filter Smoother update
-    for k   = (size(observations,2)-1):-1:1
+    ks_covs[:,:,K] = inv( inv(kf.covs_[:,:,K]) + Pbi_K )
+    ks_means[:,K]  = ks_covs[:,:,K]*( kf.covs_[:,:,K]\kf.means_[:,K] + c )
+    # main loop
+    for k = (K-1):-1:1
+        # Kalman Smoother with 2 Filter Smoother update
         G   = (eye(lg.dimx) + lg.Q*Pbi)\lg.A
         Pbi = Pbi_K+iQA'*(lg.A-G)
         c   = iRB'*observations[:,k] + G'*c
         #
-        ks_covs[:,:,k] = inv(inv(kf.covariances_[:,:,k]) + Pbi )
-        ks_means[:,k]  = ks_covs[:,:,k] * (
-                            kf.covariances_[:,:,k] \ kf.means_[:,k] + c )
+        ks_covs[:,:,k] = inv( inv(kf.covs_[:,:,k]) + Pbi )
+        ks_means[:,k]  = ks_covs[:,:,k]*( kf.covs_[:,:,k]\kf.means_[:,k] + c )
     end
     KalmanSmoother(ks_means, ks_covs)
 end

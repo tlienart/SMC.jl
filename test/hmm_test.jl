@@ -59,9 +59,9 @@ srand(12)
                                                     R, K, x00, eye(dx))
 
 @test isapprox(kf.means, kfm_leg)
-@test isapprox(kf.covariances, kfc_leg)
+@test isapprox(kf.covs, kfc_leg)
 @test isapprox(kf.means_, kfm__leg)
-@test isapprox(kf.covariances_, kfc__leg)
+@test isapprox(kf.covs_, kfc__leg)
 
 # fragile test
 @test norm(kf.means-states)/norm(states) < 0.25
@@ -73,7 +73,7 @@ srand(32)
                                 kfm__leg, kfc__leg)
 
 @test isapprox(ks.means, ksm_leg)
-@test isapprox(ks.covariances, ksc_leg)
+@test isapprox(ks.covs, ksc_leg)
 
 # fragile test
 @test norm(ks.means-states)/norm(states) < 0.2
