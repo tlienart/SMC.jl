@@ -5,7 +5,8 @@ function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
                         )::Tuple{ParticleSet,Vector{Float}}
 
     K   = size(observations, 2)
-    ps  = ParticleSet(N, hmm.dimx, K)
+    # particle set filter (storage)
+    psf = ParticleSet(N, hmm.dimx, K)
     ess = zeros(N)
 
 #    (p1,e1) = resample(Particles(samplesmu1(N), ones(N)/N), essthresh)
@@ -13,11 +14,11 @@ function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
                 Particles( [proposal.noise() for i in 1:N], ones(N)/N),
                 essthresh )
     # store
-    ps.p[1] = p1
-    ess[1]  = e1
+    psf.p[1] = p1
+    ess[1]   = e1
 
     for k=2:K
-        pkm1 = ps.p[k-1]
+        pkm1 = psf.p[k-1]
         obsk = observations[:,k]
 
         logak = zeros(N)
@@ -37,8 +38,8 @@ function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
 
         (pk, ek) = resample(Particles(xk,wk), essthresh)
 
-        ps.p[k] = pk
-        ess[k]  = ek
+        psf.p[k] = pk
+        ess[k]   = ek
     end
-    (ps, ess)
+    (psf, ess)
 end

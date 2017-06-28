@@ -46,6 +46,11 @@ function kalmanfilter(lg::LinearGaussian, observations::Matrix{Float},
     KalmanFilter(kf_means, kf_covs, kf_means_, kf_covs_)
 end
 
+"""
+    kalmansmoother(lg, observations, kf)
+
+Two-filter smoother in linear gaussian case (everything is tractable).
+"""
 function kalmansmoother(lg::LinearGaussian, observations::Matrix{Float},
                         kf::KalmanFilter)::KalmanSmoother
     ks_means = similar(kf.means)

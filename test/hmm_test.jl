@@ -78,14 +78,26 @@ srand(32)
 # fragile test
 @test norm(ks.means-states)/norm(states) < 0.2
 
-(ps, ess) = particlefilter(hmm, observations, 100, bootstrapprop(lg))
+(psf, ess) = particlefilter(hmm, observations, 100, bootstrapprop(lg))
 
-@test length(ps)==K
+@test length(psf)==K
 
-pfm  = mean(ps)
+pfm  = mean(psf)
 pfmm = zeros(dx,K)
 for k in 1:K
     pfmm[:,k] = pfm[k]
 end
 
 @test norm(pfmm-states)/norm(states) < 0.4
+
+# works but it's unbearably slow (complexity seems to be N3)
+
+# psw = particlesmoother_ffbs(hmm, psf)
+#
+# psm = mean(psw)
+# psmm = zeros(dx,K)
+# for k in 1:K
+#     psmm[:,k] = psm[k]
+# end
+#
+# @show norm(psmm-states)/norm(states)
