@@ -1,6 +1,12 @@
 export
     particlesmoother_ffbs
 
+"""
+    particlesmoother_ffbs
+
+http://www.stats.ox.ac.uk/~doucet/briers_doucet_maskell_smoothingstatespacemodels.pdf
+Check equation 11
+"""
 function particlesmoother_ffbs(hmm::HMM, psf::ParticleSet)
     K = length(psf)
     N = length(psf.p[1])
