@@ -43,9 +43,9 @@ obs3   = B*state3+noisey[:,3]
 @test isapprox( hmm.transmean(0,state1), A*state1)
 @test isapprox( hmm.obsmean(0,state1), B*state1)
 @test isapprox( hmm.transloglik(0,state1,state2),
-        (-norm(chol(Q)\(state2-A*state1))^2/2) )
+        (-norm(chol(Q)'\(state2-A*state1))^2/2) )
 @test isapprox( hmm.obsloglik(0,state2,obs2),
-        (-norm(chol(R)\(  obs2-B*state2))^2/2) )
+        (-norm(chol(R)'\(  obs2-B*state2))^2/2) )
 
 K = 100
 (states, observations) = generate(lg, x0, K)
@@ -78,7 +78,7 @@ srand(32)
 # fragile test
 @test norm(ks.means-states)/norm(states) < 0.2
 
-(ps, ess) = particlefilter(hmm, observations, 100)
+(ps, ess) = particlefilter(hmm, observations, 100, bootstrapprop(lg))
 
 @test length(ps)==K
 

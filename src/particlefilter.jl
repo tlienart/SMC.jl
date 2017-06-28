@@ -1,7 +1,7 @@
 export particlefilter
 
 function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
-                        essthresh::Float=0.5
+                        proposal::Proposal, essthresh::Float=0.5
                         )::Tuple{ParticleSet,Vector{Float}}
 
     K   = size(observations, 2)
@@ -9,8 +9,10 @@ function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
     ess = zeros(N)
 
 #    (p1,e1) = resample(Particles(samplesmu1(N), ones(N)/N), essthresh)
-    (p1,e1) = resample(Particles(
-                        [hmm.transnoise() for i in 1:N], ones(N)/N), essthresh)
+    (p1,e1) = resample(
+                Particles( [proposal.noise() for i in 1:N], ones(N)/N),
+                essthresh )
+    # store
     ps.p[1] = p1
     ess[1]  = e1
 
@@ -22,8 +24,10 @@ function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
         xk    = similar(pkm1.x)
         # sample (BOOTSTRAP)
         for i in 1:N
-            xk[i]    = hmm.transmean(k, pkm1.x[i]) + hmm.transnoise()
-            logak[i] = hmm.obsloglik(k, xk[i], obsk)
+            xk[i]    = proposal.mean(k, pkm1.x[i], obsk) + proposal.noise()
+            logak[i] = hmm.transloglik(k, pkm1.x[i], xk[i]) +
+                        hmm.obsloglik(k, xk[i], obsk) -
+                        proposal.loglik(k, pkm1.x[i], obsk, xk[i])
         end
 
         Wk  = log.(pkm1.w) + logak

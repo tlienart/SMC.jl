@@ -8,10 +8,8 @@ abstract type AbstractHMM end
 struct HMM <: AbstractHMM
     transmean::Function
     transloglik::Function # log transition function:  f(xk|xkm1)
-    transnoise::Function
     obsmean::Function
     obsloglik::Function   # log observation function: g(y|xk)
-    obsnoise::Function
     dimx::Int
     dimy::Int
 end
@@ -30,6 +28,7 @@ struct LinearGaussian <: AbstractHMM
     dimy::Int
     cholQ::Union{Float,UpperTriangular{Float, Matrix{Float}}}
     cholR::Union{Float,UpperTriangular{Float, Matrix{Float}}}
+    hmm::HMM
     function LinearGaussian(A,B,Q,R)
         dimx=size(A,1)
         dimy=size(B,1)
@@ -43,16 +42,11 @@ end
 
 function HMM(lg::LinearGaussian)
     transmean   = (k, xkm1) -> lg.A*xkm1
-    obsmean     = (k, xk) -> lg.B*xk
-    transloglik = (k, xkm1, xk) -> -norm(lg.cholQ\(xk - transmean(k,xkm1)))^2/2
-    obsloglik   = (k, xk,   yk) -> -norm(lg.cholR\(yk - obsmean(k,xk)))^2/2
+    obsmean     = (k, xk)   -> lg.B*xk
+    transloglik = (k, xkm1, xk) -> -norm(lg.cholQ'\(xk - transmean(k,xkm1)))^2/2
+    obsloglik   = (k, xk,   yk) -> -norm(lg.cholR'\(yk - obsmean(k,xk)))^2/2
 
-    transnoise() = lg.cholQ'*randn(lg.dimx)
-    obsnoise()   = lg.cholR'*randn(lg.dimy)
-
-    HMM(transmean, transloglik, transnoise,
-        obsmean, obsloglik, obsnoise,
-        lg.dimx, lg.dimy)
+    HMM(transmean, transloglik, obsmean, obsloglik, lg.dimx, lg.dimy)
 end
 
 ### Generation of observations
