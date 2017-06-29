@@ -12,7 +12,7 @@ function bootstrapprop(lg::LinearGaussian)
     hmm = HMM(lg)
     n = nothing
     Proposal(
-        (k=n)                  -> lg.cholQ*randn(lg.dimx),
+        (k=n)                  -> lg.cholQ' * randn(lg.dimx),
         (k=n,xkm1=n,yk=n)      -> hmm.transmean(k, xkm1),
         (k=n,xkm1=n,yk=n,xk=n) -> hmm.transloglik(k, xkm1, xk)
     )

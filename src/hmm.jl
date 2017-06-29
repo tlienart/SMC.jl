@@ -16,8 +16,8 @@ end
 
 struct LinearGaussian <: AbstractHMM
     #=
-        x <- Ax + Q*randn
-        y <- Bx + R*randn
+        x <- Ax + chol(Q)' * randn
+        y <- Bx + chol(Q)' * randn
     =#
     A::Matrix{Float}
     B::Matrix{Float}
@@ -41,11 +41,13 @@ struct LinearGaussian <: AbstractHMM
 end
 
 function HMM(lg::LinearGaussian)
-    transmean   = (k, xkm1) -> lg.A*xkm1
-    obsmean     = (k, xk)   -> lg.B*xk
-    transloglik = (k, xkm1, xk) -> -norm(lg.cholQ'\(xk - transmean(k,xkm1)))^2/2
-    obsloglik   = (k, xk,   yk) -> -norm(lg.cholR'\(yk - obsmean(k,xk)))^2/2
-
+    # means
+    transmean   = (k,xkm1) -> lg.A*xkm1
+    obsmean     = (k,xk)   -> lg.B*xk
+    # loglikelihoods
+    transloglik = (k,xkm1,xk) -> -norm(lg.cholQ'\(xk - transmean(k,xkm1)))^2/2
+    obsloglik   = (k,xk,  yk) -> -norm(lg.cholR'\(yk - obsmean(k,xk)))^2/2
+    # Package and return
     HMM(transmean, transloglik, obsmean, obsloglik, lg.dimx, lg.dimy)
 end
 
@@ -59,19 +61,20 @@ Generate observations following a given dynamic for `T` time steps.
 function generate(lg::LinearGaussian, x0::Vector{Float}, K::Int
                     )::Tuple{Matrix{Float},Matrix{Float}}
     @assert length(x0)==lg.dimx "dimensions don't match"
-
+    # allocate states/observations
     states, observations = zeros(lg.dimx, K), zeros(lg.dimy, K)
-
+    # assign first state
     states[:,1] = x0
-
-    noisex = lg.cholQ'*randn(lg.dimx,K)
-    noisey = lg.cholR'*randn(lg.dimy,K)
-
+    # pre-generate noise
+    noisex = lg.cholQ' * randn(lg.dimx,K)
+    noisey = lg.cholR' * randn(lg.dimy,K)
+    # use noise in iterative linear system
     for k = 1:(K-1)
         observations[:,k] = lg.B*states[:,k] + noisey[:,k]
         states[:,k+1]     = lg.A*states[:,k] + noisex[:,k+1]
     end
+    # last observation
     observations[:,K] = lg.B*states[:,K] + noisey[:,K]
-
+    # package and return
     return (states, observations)
 end

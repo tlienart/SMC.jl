@@ -24,8 +24,8 @@ srand(123)
 (states, observations) = generate(lg, x0, 3)
 
 srand(123)
-noisex = chol(Q)'*randn(dx, 3)
-noisey = chol(R)'*randn(dy, 3)
+noisex = chol(Q)' * randn(dx, 3)
+noisey = chol(R)' * randn(dy, 3)
 state1 = x0
 state2 = A*state1+noisex[:,2] # we do not use the first noise
 state3 = A*state2+noisex[:,3] # since x0 is given
@@ -100,4 +100,4 @@ for k in 1:K
     psmm[:,k] = psm[k]
 end
 
-@test norm(psmm-states)/norm(states) < 0.25
+@test norm(psmm-states)/norm(states) < 0.3
