@@ -18,13 +18,14 @@ function particlesmoother_ffbs(hmm::HMM, psf::ParticleSet)
     for k=(K-1):-1:1
         pkp1 = pk
         pk   = psw.p[k]
-        # numerator of FFBS formula
-        ffbsnum(i,j) = exp(log(pk.w[i])+hmm.transloglik(k,pk.x[i],pkp1.x[j]))
-        # denominator of FFBS formula
-        ffbsdenom(j) = sum(ffbsnum(s,j) for s in 1:N)
-        # ffbs formula
+        # denominators precomputation: O(N^2) comp, O(N) storage
+        ds = [ sum( pk.w[l]*exp(hmm.transloglik(k,pk.x[l],pkp1.x[j]))
+                        for l in 1:N ) for j in 1:N ]
+        # FFBS formula, in place computations, O(N) for each i so O(N^2) all
         for i in 1:N
-            pk.w[i] = sum( pkp1.w[j]*ffbsnum(i,j)/ffbsdenom(j) for j in 1:N )
+            pk.w[i] *= sum( pkp1.w[j] *
+                                exp(hmm.transloglik(k,pk.x[i],pkp1.x[j])) /
+                                    ds[j] for j in 1:N )
         end
         pk.w /= sum(pk.w)
         # store the updated weights

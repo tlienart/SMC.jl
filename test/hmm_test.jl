@@ -92,12 +92,12 @@ end
 
 # works but it's unbearably slow (complexity seems to be N3)
 
-# psw = particlesmoother_ffbs(hmm, psf)
-#
-# psm = mean(psw)
-# psmm = zeros(dx,K)
-# for k in 1:K
-#     psmm[:,k] = psm[k]
-# end
-#
-# @show norm(psmm-states)/norm(states)
+psw = particlesmoother_ffbs(hmm, psf)
+
+psm = mean(psw)
+psmm = zeros(dx,K)
+for k in 1:K
+    psmm[:,k] = psm[k]
+end
+
+@test norm(psmm-states)/norm(states) < 0.25
