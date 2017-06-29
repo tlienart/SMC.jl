@@ -24,10 +24,10 @@ Pkg.clone("https://github.com/tlienart/SMC.jl.git")
 using SMC
 ```
 
-## Things implemented
+## Algorithms implemented
 
-* Kalman Filter and Smoother (for comparison on Linear Gaussian model)
-* Particle Filter for HMM
+* Kalman Filter and Smoother (2FS) for comparison on Linear Gaussian model
+* Particle Filter
 * Particle Smoother (FFBS)
 
 **Notes**
