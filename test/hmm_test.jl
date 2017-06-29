@@ -78,6 +78,7 @@ srand(32)
 # fragile test
 @test norm(ks.means-states)/norm(states) < 0.2
 
+srand(155)
 (psf, ess) = particlefilter(hmm, observations, 100, bootstrapprop(lg))
 
 @test length(psf)==K
@@ -90,6 +91,7 @@ end
 
 @test norm(pfmm-states)/norm(states) < 0.4
 
+srand(521)
 psw  = particlesmoother_ffbs(hmm, psf)
 
 @test length(psw)==K
