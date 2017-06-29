@@ -33,6 +33,7 @@ using SMC
 **Notes**
 - FFBS refers to the *Forward Filtering Backward Smoothing*
 - 2FS refers to the *Two Filter Formula*
+- BIS refers to the *Backward Information Smoother* algorithm
 
 ## References
 
