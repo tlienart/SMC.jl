@@ -1,7 +1,9 @@
 export particlefilter
 
 function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
-                        proposal::Proposal, essthresh::Float=0.5
+                        proposal::Proposal;
+                        resampling::Function=multinomialresampling,
+                        essthresh::Float=0.5
                         )::Tuple{ParticleSet,Vector{Float}}
 
     K   = size(observations, 2)
@@ -36,7 +38,7 @@ function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
         wk  = exp.(Wk)
         wk /= sum(wk)
 
-        (pk, ek) = resample(Particles(xk,wk), essthresh)
+        (pk, ek) = resample(Particles(xk,wk), essthresh, resampling)
 
         psf.p[k] = pk
         ess[k]   = ek

@@ -1,7 +1,5 @@
 using SMC, Base.Test
 
-include("_legacy_.jl")
-
 ############################
 
 srand(125)
@@ -46,60 +44,3 @@ obs3   = B*state3+noisey[:,3]
         (-norm(chol(Q)'\(state2-A*state1))^2/2) )
 @test isapprox( hmm.obsloglik(0,state2,obs2),
         (-norm(chol(R)'\(  obs2-B*state2))^2/2) )
-
-K = 100
-(states, observations) = generate(lg, x0, K)
-
-x00 = x0+randn(dx)/5
-
-srand(12)
-kf = kalmanfilter(lg, observations, x00, eye(dx))
-srand(12)
-(kfm_leg, kfc_leg, kfm__leg, kfc__leg) = kf_legacy(observations, A, B, Q,
-                                                    R, K, x00, eye(dx))
-
-@test isapprox(kf.means, kfm_leg)
-@test isapprox(kf.covs, kfc_leg)
-@test isapprox(kf.means_, kfm__leg)
-@test isapprox(kf.covs_, kfc__leg)
-
-# fragile test
-@test norm(kf.means-states)/norm(states) < 0.25
-
-srand(32)
-ks = kalmansmoother(lg, observations, kf)
-srand(32)
-(ksm_leg, ksc_leg) = ks_legacy(observations, A, B, Q, R, K,
-                                kfm__leg, kfc__leg)
-
-@test isapprox(ks.means, ksm_leg)
-@test isapprox(ks.covs, ksc_leg)
-
-# fragile test
-@test norm(ks.means-states)/norm(states) < 0.2
-
-srand(155)
-(psf, ess) = particlefilter(hmm, observations, 100, bootstrapprop(lg))
-
-@test length(psf)==K
-
-pfm  = mean(psf)
-pfmm = zeros(dx,K)
-for k in 1:K
-    pfmm[:,k] = pfm[k]
-end
-
-@test norm(pfmm-states)/norm(states) < 0.4
-
-srand(521)
-psw  = particlesmoother_ffbs(hmm, psf)
-
-@test length(psw)==K
-
-psm  = mean(psw)
-psmm = zeros(dx,K)
-for k in 1:K
-    psmm[:,k] = psm[k]
-end
-
-@test norm(psmm-states)/norm(states) < 0.3
