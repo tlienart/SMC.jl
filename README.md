@@ -27,3 +27,16 @@ using SMC
 ## Things implemented
 
 * Kalman Filter and Smoother (for comparison on Linear Gaussian model)
+* Particle Filter for HMM
+* Particle Smoother (FFBS)
+
+**Notes**
+- FFBS refers to the *Forward Filtering Backward Smoothing*
+- 2FS refers to the *Two Filter Formula*
+
+## References
+
+(in no particular order)
+
+* Briers, Doucet, Maskell, *Smoothing algorithms for state-space models*, [link](http://www.stats.ox.ac.uk/~doucet/briers_doucet_maskell_smoothingstatespacemodels.pdf), 2009.
+* Doucet, Johansen, *A tutorial on particle filtering and smoothing*, [link](http://www.stats.ox.ac.uk/~doucet/doucet_johansen_tutorialPF2011.pdf), 2012.
