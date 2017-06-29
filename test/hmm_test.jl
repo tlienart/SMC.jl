@@ -90,11 +90,11 @@ end
 
 @test norm(pfmm-states)/norm(states) < 0.4
 
-# works but it's unbearably slow (complexity seems to be N3)
+psw  = particlesmoother_ffbs(hmm, psf)
 
-psw = particlesmoother_ffbs(hmm, psf)
+@test length(psw)==K
 
-psm = mean(psw)
+psm  = mean(psw)
 psmm = zeros(dx,K)
 for k in 1:K
     psmm[:,k] = psm[k]

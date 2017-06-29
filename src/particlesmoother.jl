@@ -4,8 +4,8 @@ export
 """
     particlesmoother_ffbs
 
-http://www.stats.ox.ac.uk/~doucet/briers_doucet_maskell_smoothingstatespacemodels.pdf
-Check equation 11
+Particle smoother based on the Forward Filtering Backward Smoothing algorithm.
+The complexity of this algorithm is O(KN^2)
 """
 function particlesmoother_ffbs(hmm::HMM, psf::ParticleSet)
     K = length(psf)
