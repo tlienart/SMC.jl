@@ -1,5 +1,6 @@
 export
-    particlesmoother_ffbs
+    particlesmoother_ffbs,
+    particlesmoother_gtfs
 
 """
     particlesmoother_ffbs
@@ -34,4 +35,23 @@ function particlesmoother_ffbs(hmm::HMM, psf::ParticleSet)
         psw.p[k].w = copy(pk.w)
     end
     psw
+end
+
+"""
+  particlesmoother_gtfs
+
+Particle smoother based on the Generalised Two Filter Smoothing algorithm.
+"""
+function particlesmoother_gtfs(hmm::HMM, psf::ParticleSet;
+                               resampling::Function=multinomialresampling,
+                               essthresh::Float=0.5
+                               )::ParticleSet
+    K = length(psf)
+    N = length(psf.p[1])
+    # particle set smoother (storage)
+    psw = deepcopy(psf)
+    #
+    # Particles at last step need be resampled
+    (pK,eK) = resample(psw.p[K], essthresh, resampling)
+
 end
