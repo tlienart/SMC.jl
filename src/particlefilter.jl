@@ -11,7 +11,6 @@ function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
     psf = ParticleSet(N, hmm.dimx, K)
     ess = zeros(N)
 
-#    (p1,e1) = resample(Particles(samplesmu1(N), ones(N)/N), essthresh)
     (p1,e1) = resample(
                 Particles( [proposal.noise() for i in 1:N], ones(N)/N),
                 essthresh )

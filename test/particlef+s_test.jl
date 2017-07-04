@@ -1,3 +1,4 @@
+using SMC, Base.Test
 srand(125)
 
 ## Linear Gaussian
@@ -29,14 +30,25 @@ end
 @test norm(pfmm-states)/norm(states) < 0.4
 
 srand(521)
-psw  = particlesmoother_ffbs(hmm, psf)
+psffbs  = particlesmoother_ffbs(hmm, psf)
 
-@test length(psw)==K
+@test length(psffbs)==K
 
-psm  = mean(psw)
+psm  = mean(psffbs)
 psmm = zeros(dx,K)
 for k in 1:K
     psmm[:,k] = psm[k]
 end
 
-@test norm(psmm-states)/norm(states) < 0.3
+@test norm(psmm-states)/norm(states) < 0.2
+
+srand(521)
+(psbbis, ess) = particlesmoother_bbis(hmm, psf, observations, bootstrapprop(lg))
+
+psm2  = mean(psbbis)
+psmm2 = zeros(dx,K)
+for k in 1:K
+    psmm2[:,k] = psm2[k]
+end
+
+@test norm(psmm2-states)/norm(states) < 0.2

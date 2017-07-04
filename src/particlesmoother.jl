@@ -1,7 +1,6 @@
 export
     particlesmoother_ffbs,
-    particlesmoother_gtfs
-
+    particlesmoother_bbis
 """
     particlesmoother_ffbs
 
@@ -37,20 +36,89 @@ function particlesmoother_ffbs(hmm::HMM, psf::ParticleSet)
     psw
 end
 
-# """
-#   particlesmoother_bis
-#
-# Particle smoother based on the Backward Information Smoothing algorithm.
-# """
-# function particlesmoother_bis(hmm::HMM, psf::ParticleSet;
-#                               resampling::Function=multinomialresampling,
-#                               essthresh::Float=0.5 )::ParticleSet
-#     K = length(psf)
-#     N = length(psf.p[1])
-#     # particle set smoother (storage)
-#     psw = deepcopy(psf)
-#     #
-#     # Particles at last step need be resampled
-#     (pK,eK) = resample(psw.p[K], essthresh, resampling)
-#
-# end
+"""
+  particlesmoother_bbis
+
+Bootstrap backward information smoother.
+"""
+function particlesmoother_bbis(hmm::HMM, psf::ParticleSet,
+                               observations::Matrix{Float}, bootstrap::Proposal;
+                               resampling::Function=multinomialresampling,
+                               essthresh::Float=0.5
+                               )::Tuple{ParticleSet,Vector{Float}}
+    K = length(psf)
+    N = length(psf.p[1])
+    # particle set smoother (storage)
+    pss = deepcopy(psf)
+    ess = zeros(N)
+    # Particles at last step need to be resampled
+    (pK,eK)  = resample(pss.p[K], essthresh, resampling)
+    pss.p[K] = pK
+    ess[K]   = eK
+    #
+    for k=(K-1):-1:2
+        obsk   = observations[:,k]
+        psskp1 = pss.p[k+1] # smoothing particles from previous step (k+1)
+        psfk   = psf.p[k]   # filtering particles for PD_{k+1}(x_k+1)
+        psfkm1 = psf.p[k-1] # filtering particles for PD_{k}(x_k)
+        # preparing indices (for each j sample from 1 of the mixture component)
+        randmult = rand(Multinomial(N,psfkm1.w))
+        indices  = [j for i in 1:N for j in ones(Int,randmult[i])*i] # unroll
+        # precompute denominator of the update factor PD_{k+1}(x_k+1)
+        denj = [ sum( psfk.w[l] *
+                        exp(hmm.transloglik(l, psfk.x[l], psskp1.x[j]))
+                          for l in 1:N ) for j in 1:N ]
+        xk    = similar(psfk.x)
+        logak = zeros(N)
+        # sample and update weight for each smoothing particle
+        for j = 1:N
+            # sampling from corresponding element (see multinomial step)
+            xk[j] = bootstrap.mean(k, psfkm1.x[indices[j]]) + bootstrap.noise()
+            # weight update factor
+            logak[j] = hmm.transloglik(k, xk[j], psskp1.x[j]) +
+                        hmm.obsloglik(k, xk[j], obsk) -
+                          log(denj[j])
+        end
+        # normalise weights
+        Wk  = log.(psskp1.w) + logak
+        Wk -= minimum(Wk)
+        wk  = exp.(Wk)
+        wk /= sum(wk)
+
+        (pk, ek) = resample(Particles(xk,wk), essthresh, resampling)
+
+        pss.p[k] = pk
+        ess[k]   = ek
+    end
+
+    # ----------------------------------------
+    # LAST STEP (sampling from gamma1 = prior)
+
+    obsk   = observations[:,1]
+    psskp1 = pss.p[2] # smoothing particles from previous step (k+1)
+    psfk   = psf.p[1]   # filtering particles for PD_{k+1}(x_k+1)
+    denj   = [ sum( psfk.w[l] *
+                      exp(hmm.transloglik(l, psfk.x[l], psskp1.x[j]))
+                        for l in 1:N ) for j in 1:N ]
+    xk     = similar(psfk.x)
+    logak  = zeros(N)
+
+    for j = 1:N
+        xk[j]    = bootstrap.noise() # sampling from prior
+        logak[j] = hmm.transloglik(1, xk[j], psskp1.x[j]) +
+                    hmm.obsloglik(1, xk[j], obsk) -
+                      log(denj[j])
+    end
+    # normalise weights
+    Wk  = log.(psskp1.w) + logak
+    Wk -= minimum(Wk)
+    wk  = exp.(Wk)
+    wk /= sum(wk)
+
+    (p1, e1) = resample(Particles(xk,wk), essthresh, resampling)
+
+    pss.p[1] = p1
+    ess[1]   = e1
+
+    (pss, ess)
+end
