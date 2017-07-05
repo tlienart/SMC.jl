@@ -9,7 +9,7 @@ function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
     K   = size(observations, 2)
     # particle set filter (storage)
     psf = ParticleSet(N, hmm.dimx, K)
-    ess = zeros(N)
+    ess = zeros(K)
 
     (p1,e1) = resample(
                 Particles( [proposal.noise() for i in 1:N], ones(N)/N),

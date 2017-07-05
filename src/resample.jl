@@ -5,10 +5,12 @@ Resamples the particle object `p` if the ess is under `essthresh`. The
 resampling algorithm `rs` is for example a multinomial resampling.
 """
 function resample(p::Particles, essthresh::Float=Inf,
-                    rs::Function=multinomialresampling
+                    rs::Function=multinomialresampling, M::Int=0
                     )::Tuple{Particles,Float}
     ess = 1.0/sum(p.w.^2)
-    (ess < essthresh * length(p)) ? (rs(p),ess) : (p,ess)
+    N   = length(p)
+    M   = M>0 ? M : N
+    (M != N || ess < essthresh * N) ? (rs(p, M), ess) : (p, ess)
 end
 
 """
@@ -16,9 +18,8 @@ end
 
 Multinomial resampling of a particles object `p`.
 """
-function multinomialresampling(p::Particles)::Particles
-    N    = length(p)
-    ni   = rand(Multinomial(N, p.w))
-    mask = [j for i in 1:N for j in ones(Int,ni[i])*i]
-    Particles(p.x[mask], ones(N)/N)
+function multinomialresampling(p::Particles, M::Int)::Particles
+    ni   = rand(Multinomial(M, p.w))
+    mask = [j for i in 1:length(p.w) for j in ones(Int,ni[i])*i]
+    Particles(p.x[mask], ones(M)/M)
 end

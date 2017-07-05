@@ -13,11 +13,12 @@ lg  = LinearGaussian(A,B,Q,R)
 hmm = HMM(lg)
 x0  = randn(dx)
 
-K = 100
+K = 50
+N = 150
 (states, observations) = generate(lg, x0, K)
 
 srand(155)
-(psf, ess) = particlefilter(hmm, observations, 100, bootstrapprop(lg))
+(psf, ess) = particlefilter(hmm, observations, N, bootstrapprop(lg))
 
 @test length(psf)==K
 
@@ -28,6 +29,7 @@ for k in 1:K
 end
 
 @test norm(pfmm-states)/norm(states) < 0.4
+println("PF    : $(norm(pfmm-states)/norm(states))")
 
 srand(521)
 psffbs  = particlesmoother_ffbs(hmm, psf)
@@ -40,15 +42,18 @@ for k in 1:K
     psmm[:,k] = psm[k]
 end
 
-@test norm(psmm-states)/norm(states) < 0.2
+@test norm(psmm-states)/norm(states) < 0.25
+println("PSFFBS: $(norm(psmm-states)/norm(states))")
 
 srand(521)
-(psbbis, ess) = particlesmoother_bbis(hmm, psf, observations, bootstrapprop(lg))
+(psbbis, ess) = particlesmoother_bbis(hmm, observations, N,
+                                        psf, bootstrapprop(lg))
 
-psm2  = mean(psbbis)
-psmm2 = zeros(dx,K)
+psm3  = mean(psbbis)
+psmm3 = zeros(dx,K)
 for k in 1:K
-    psmm2[:,k] = psm2[k]
+    psmm3[:,k] = psm3[k]
 end
 
-@test norm(psmm2-states)/norm(states) < 0.2
+@test norm(psmm3-states)/norm(states) < 0.23
+println("PSBISQ: $(norm(psmm3-states)/norm(states))")
