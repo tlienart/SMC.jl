@@ -18,7 +18,7 @@ N = 150
 (states, observations) = generate(lg, x0, K)
 
 srand(155)
-(psf, ess) = particlefilter(hmm, observations, N, bootstrapprop(lg))
+@time (psf, ess) = particlefilter(hmm, observations, N, bootstrapprop(lg))
 
 @test length(psf)==K
 
@@ -32,7 +32,7 @@ end
 println("PF    : $(norm(pfmm-states)/norm(states))")
 
 srand(521)
-psffbs  = particlesmoother_ffbs(hmm, psf)
+@time psffbs  = particlesmoother_ffbs(hmm, psf)
 
 @test length(psffbs)==K
 
@@ -46,7 +46,7 @@ end
 println("PSFFBS: $(norm(psmm-states)/norm(states))")
 
 srand(521)
-(psbbis, ess) = particlesmoother_bbis(hmm, observations, N,
+@time (psbbis, ess) = particlesmoother_bbis(hmm, observations, N,
                                         psf, bootstrapprop(lg))
 
 psm3  = mean(psbbis)
@@ -57,3 +57,16 @@ end
 
 @test norm(psmm3-states)/norm(states) < 0.23
 println("PSBISQ: $(norm(psmm3-states)/norm(states))")
+
+srand(521)
+@time (pslbbis, ess) = particlesmoother_lbbis(hmm, observations, N,
+                                        psf, bootstrapprop(lg))
+
+psm4  = mean(pslbbis)
+psmm4 = zeros(dx,K)
+for k in 1:K
+    psmm4[:,k] = psm4[k]
+end
+
+@test norm(psmm3-states)/norm(states) < 0.23
+println("PSBISL: $(norm(psmm4-states)/norm(states))")
