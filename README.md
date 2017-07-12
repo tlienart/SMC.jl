@@ -37,8 +37,8 @@ using SMC
 - 2FS refers to the *Two Filter Formula*
 - BIS(Q) refers to the *Backward Information Smoother* algorithm with quadratic complexity
 - BIS(SQ) refers to the same algorithm but with a trick reducing the complexity to subquadratic (the estimators are still consistent)
-- aBIS(L) refers to the algorithm with independent sampling of mixture labels (see SAPBP) and consequent linear complexity (estimators are *not* consistent)
-- SAPBP sequential auxiliary particle belief propagation (contains a method to sample efficiently but approximately from products of mixtures)
+- aBIS(L) refers to the same algorithm with independent sampling of mixture labels (see SAPBP) and consequent linear complexity (estimators are *not* consistent)
+- SAPBP refers to the *Sequential Auxiliary Particle Belief Propagation* paper (contains a method to sample efficiently but approximately from products of mixtures)
 
 ## References
 
