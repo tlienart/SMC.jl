@@ -28,7 +28,7 @@ function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
         for i in 1:N
             xk[i]    = proposal.mean(k, pkm1.x[i], obsk) + proposal.noise()
             logak[i] = hmm.transloglik(k, pkm1.x[i], xk[i]) +
-                        hmm.obsloglik(k, xk[i], obsk) -
+                        hmm.obsloglik(k, obsk, xk[i]) -
                         proposal.loglik(k, pkm1.x[i], obsk, xk[i])
         end
 

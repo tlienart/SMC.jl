@@ -17,3 +17,15 @@ function bootstrapprop(lg::LinearGaussian)
         (k=n,xkm1=n,yk=n,xk=n) -> hmm.transloglik(k, xkm1, xk)
     )
 end
+
+# # reverese bootstrap (reversed dynamic)
+# function rbootstrap(lg::LinearGaussian)
+#     hmm = HMM(lg)
+#     n   = nothing
+#     pia = pinv(lg.A)
+#     Proposal(
+#         (k=n)                  -> pia * lg.cholQ' * randn(lg.dimx)
+#         (k=n,xkp1=n,yk=n)      -> pia * xkp1
+#         (k=n,xk=n,yk=n,xkp1)   -> hmm.transloglik(k, xk, xkp1)
+#     )
+# end
