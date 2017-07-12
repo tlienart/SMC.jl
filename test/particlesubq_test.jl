@@ -49,7 +49,7 @@ for k in 1:K
     psmm4[:,k] = psm4[k]
 end
 
-@test norm(psmm4-states)/norm(states) < 0.9
+@test norm(psmm4-states)/norm(states) < 1.
 println("PSBISL: $(norm(psmm4-states)/norm(states))")
 
 srand(521)
@@ -63,7 +63,7 @@ for k in 1:K
     psmm5[:,k] = psm5[k]
 end
 
-@test norm(psmm5-states)/norm(states) < 0.9
+@test norm(psmm5-states)/norm(states) < 1.0
 println("PSBISLL: $(norm(psmm5-states)/norm(states))")
 
 srand(521)

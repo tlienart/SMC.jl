@@ -3,16 +3,18 @@ export
     bootstrapprop
 
 struct Proposal
+    mu0::Vector{Float}
     noise::Function
     mean::Function
     loglik::Function
 end
 
-function bootstrapprop(lg::LinearGaussian)
-    hmm = HMM(lg)
+function bootstrapprop(g::GaussianHMM, mu0::Vector{Float}=[0.0])
+    hmm = HMM(g)
     n = nothing
     Proposal(
-        (k=n)                  -> lg.cholQ' * randn(lg.dimx),
+        (mu0==[0.0]) ? zeros(g.dimx) : mu0,
+        (k=n)                  -> g.cholQ' * randn(g.dimx),
         (k=n,xkm1=n,yk=n)      -> hmm.transmean(k, xkm1),
         (k=n,xkm1=n,yk=n,xk=n) -> hmm.transloglik(k, xkm1, xk)
     )
