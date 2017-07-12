@@ -1,6 +1,8 @@
 export
     HMM,
     LinearGaussian,
+    NonLinearGaussian,
+    GaussianHMM,
     generate
 
 abstract type AbstractHMM end
@@ -22,8 +24,8 @@ struct LinearGaussian <: GaussianHMM
     =#
     A::Matrix{Float}
     B::Matrix{Float}
-    Q::Matrix{Float}
-    R::Matrix{Float}
+    Q::Union{Float,Matrix{Float}}
+    R::Union{Float,Matrix{Float}}
     # implicit
     dimx::Int
     dimy::Int
@@ -51,8 +53,8 @@ struct NonLinearGaussian <: GaussianHMM
     =#
     transmean::Function
     obsmean::Function
-    Q::Matrix{Float}
-    R::Matrix{Float}
+    Q::Union{Float,Matrix{Float}}
+    R::Union{Float,Matrix{Float}}
     # implicit
     dimx::Int
     dimy::Int
@@ -63,9 +65,9 @@ struct NonLinearGaussian <: GaussianHMM
         dimy = size(R, 1)
         @assert issymmetric(Q) && issymmetric(R) "cov mat must be symmetric"
         @assert isposdef(Q) && isposdef(R) "cov mat must be pos def"
-        new(f,g,Q,R,dimx,dimy,chol(Q),chol(R),
-            (k,xkm1)-> f(k,xkm1),
-            (k,xk)  -> g(k,xk))
+        new((k,xkm1)-> f(k,xkm1),
+            (k,xk)  -> g(k,xk),
+            Q,R,dimx,dimy,chol(Q),chol(R)  )
     end
 end
 
