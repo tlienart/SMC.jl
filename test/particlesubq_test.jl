@@ -40,6 +40,17 @@ end
 println("PF    : $(norm(pfmm-states)/norm(states))")
 
 srand(521)
+@time pslffbs = particlesmoother_lffbs(hmm, psf, 15)
+
+pfm  = mean(pslffbs)
+pfmm = zeros(dx,K)
+for k in 1:K
+    pfmm[:,k] = pfm[k]
+end
+@test norm(pfmm-states)/norm(states) < 0.9
+println("PSLFBS: $(norm(pfmm-states)/norm(states))")
+
+srand(521)
 @time (pslbbis, ess) = particlesmoother_lbbis(hmm, observations,
                                               psf, bootstrapprop(lg))
 

@@ -14,7 +14,7 @@ function bootstrapprop(g::GaussianHMM, mu0::Union{Float,Vector{Float}}=0.0)
     n = nothing
     Proposal(
         (mu0==0.0) ? (g.dimx>1?zeros(g.dimx): mu0 ) : mu0,
-        (g.dimx>1)?(k=n)->g.cholQ'*randn(g.dimx):(k=n)->g.cholQ*randn(),
+        (g.dimx>1)?(k=n)->(g.cholQ'*randn(g.dimx)):((k=n)->g.cholQ'*randn()),
         (k=n,xkm1=n,yk=n)      -> hmm.transmean(k, xkm1),
         (k=n,xkm1=n,yk=n,xk=n) -> hmm.transloglik(k, xkm1, xk)
     )

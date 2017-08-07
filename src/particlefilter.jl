@@ -32,7 +32,6 @@ function particlefilter(hmm::HMM, observations::Matrix{Float}, N::Int,
                         hmm.obsloglik(k, obsk, xk[i]) -
                         proposal.loglik(k, pkm1.x[i], obsk, xk[i])
         end
-
         Wk  = log.(pkm1.w) + logak
         Wk -= minimum(Wk) # try to avoid underflows
         wk  = exp.(Wk)

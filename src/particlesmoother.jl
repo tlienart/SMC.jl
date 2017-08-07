@@ -1,5 +1,6 @@
 export
     particlesmoother_ffbs,
+    particlesmoother_lffbs,
     particlesmoother_bbis,
     particlesmoother_lbbis,
     particlesmoother_llbbis,
@@ -33,6 +34,47 @@ function particlesmoother_ffbs(hmm::HMM, psf::ParticleSet)
             pk.w[i] *= sum( pkp1.w[j] *
                               exp(hmm.transloglik(k,pk.x[i],pkp1.x[j])) / ds[j]
                                 for j in 1:N )
+        end
+        # normalisation
+        pk.w /= sum(pk.w)
+        # store the updated weights
+        psw.p[k].w = copy(pk.w)
+    end
+    psw
+end
+
+"""
+    particlesmoother_lffbs
+
+Particle smoother based on the Forward Filtering Backward Smoothing algorithm.
+The complexity of this algorithm is O(KNM)
+"""
+function particlesmoother_lffbs(hmm::HMM, psf::ParticleSet, M::Int)
+    K = length(psf)
+    N = length(psf.p[1])
+    # particle set smoother (storage)
+    psw = deepcopy(psf)
+    #
+    pk = psw.p[K]
+
+    for k=(K-1):-1:1
+        pkp1 = pk
+        pk   = psw.p[k]
+
+        r = rand(Multinomial(M, pkp1.w))
+        r = [i for k in 1:N for i in ones(Int,r[k])*k]
+
+        # denominator precomputation
+        # -- complexity O(NM) (linear storage)
+        ds = [ sum( pk.w[l] *
+                      exp(hmm.transloglik(k,pk.x[l],pkp1.x[r[j]]))
+                        for l in 1:N ) for j in 1:M ]
+        # FFBS formula, in place computations
+        # -- complexity O(NM)
+        for i in 1:N
+            pk.w[i] *= sum( pkp1.w[r[j]] *
+                              exp(hmm.transloglik(k,pk.x[i],pkp1.x[r[j]])) / ds[j]
+                                for j in 1:M )
         end
         # normalisation
         pk.w /= sum(pk.w)

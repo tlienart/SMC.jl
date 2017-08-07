@@ -1,5 +1,7 @@
 # SMC
 
+![stability-wip](https://img.shields.io/badge/stability-work_in_progress-lightgrey.svg)
+
 Unix | CodeCov | License
 ---- | ------- | -------
 [![Travis](https://travis-ci.org/tlienart/SMC.jl.svg?branch=master)](https://travis-ci.org/tlienart/SMC.jl) | [![CodeCov](http://codecov.io/github/tlienart/SMC.jl/coverage.svg?branch=master)](http://codecov.io/github/tlienart/SMC.jl?branch=master) | [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
